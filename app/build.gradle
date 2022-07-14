@@ -1,0 +1,72 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    compileSdkVersion 31
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.facesec.devicegroup"
+        minSdkVersion 24
+        targetSdkVersion 31
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        packagingOptions {
+            exclude 'META-INF/DEPENDENCIES'
+            exclude 'META-INF/LICENSE'
+            exclude 'META-INF/LICENSE.txt'
+            exclude 'META-INF/license.txt'
+            exclude 'META-INF/NOTICE'
+            exclude 'META-INF/NOTICE.txt'
+            exclude 'META-INF/notice.txt'
+            exclude 'META-INF/ASL2.0'
+            exclude("META-INF/*.kotlin_module")
+        }
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'com.google.android.material:material:1.5.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    implementation 'org.nanohttpd:nanohttpd:2.2.0'
+    //RxJava
+    implementation 'io.reactivex:rxjava:1.1.3'
+    //RxAndroid
+    implementation 'io.reactivex:rxandroid:1.1.0'
+    //retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.0.0'
+    //retrofit dependence Gson
+    implementation 'com.squareup.retrofit2:converter-gson:2.0.0'
+    //OkHttp
+    implementation 'com.squareup.okhttp3:okhttp:3.2.0'
+    //retrofit dependence RxJava
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.0.0'
+
+    implementation 'org.apache.httpcomponents:httpcore:4.4.1'
+    implementation 'org.apache.httpcomponents:httpclient:4.5'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.0.pr3'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.9.0.pr3'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.9.0.pr3'
+}

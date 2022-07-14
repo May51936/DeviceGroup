@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel='stylesheet' href='member.css' />
+    <link rel='stylesheet' href='main.css' />
+	<link rel="icon" href="icon.ico" type="image/x-icon">
+    <title>member page</title>
+</head>
+
+<body>
+
+<div class="mainContent">
+
+    <div class="content">
+        <p class="title" id="hint">Finding leader...</p>
+    </div>
+    <div class="content">
+        <p class="subtitle">Click to switch to maunally connecting</p>
+    </div>
+    <div class="content">
+        <button class="switchButton" onclick="window.location.href='member-manual.html'">Switch</button>
+    </div>
+
+    <div class="content">
+        <button class="backButton" id="back">Back</button>
+        <button class="nextButton" disabled="disabled" id="nextButton">Next</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.open('POST', '.', true);
+    httpRequest.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    httpRequest.send('method=2');
+    httpRequest.onreadystatechange = function () {
+        if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+            var json = httpRequest.responseText;
+            console.log(json);
+        }
+    };
+    var btn = document.getElementById("back");
+    btn.onclick=function(){
+	    httpRequest.open('POST', '.', true);
+        httpRequest.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        httpRequest.send('method=5');
+        window.location.href='index.html';
+    };
+    var nextButton = document.getElementById("nextButton");
+    var hint = document.getElementById("hint");
+    function getState(){
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState==4 && xmlhttp.status==200){
+                var status = JSON.parse(xmlhttp.responseText);
+                if (status.Status){
+                    hint.innerHTML = "Connected!";
+                    hint.style.color = "green";
+                    nextButton.disabled = false;
+                }
+                else{
+                    hint.innerHTML = "Finding leader...";
+                    hint.style.color = "black";
+                    nextButton.disabled = true;
+                }
+        	}
+        };
+        xmlhttp.open("GET", "/getMemberConnectingState", true);
+        xmlhttp.send();
+    }
+    setInterval(getState, 1000);
+</script>
+
+
+</body>
+</html>

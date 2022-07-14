@@ -1,0 +1,80 @@
+      @font-face {
+        font-family: Alibaba;
+        src: url('./font/ALIBABAPUHUITI-2-55-REGULAR.OTF');
+      }
+      .className {
+        width: 100%;
+        height: 100vh;
+        padding: 60px;
+        box-sizing: border-box;
+        position: relative;
+        background-color: #33383a;
+        background-image: url('./bg.png');
+        background-size: 100%;
+      }
+      .topBox {
+        display: flex;
+        justify-content: space-between;
+      }
+      .logo {
+        width: 17%;
+      }
+      .text {
+        font-size: 60px;
+        color: #fff;
+        font-family: Alibaba;
+      }
+      .content {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        padding: 0 60px 60px 60px;
+        box-sizing: border-box;
+      }
+      .timeBox {
+        font-size: 48px;
+        font-family: Alibaba;
+        color: #fff;
+        margin-bottom: 50px;
+      }
+      .dataBox {
+        display: flex;
+      }
+      .dataItem {
+        border-radius: 50px;
+        width: 33%;
+        text-align: center;
+      }
+      .num {
+        font-size: 120px;
+        font-family: Alibaba;
+        font-weight: 800;
+        margin-top: 75px;
+        margin-bottom: 30px;
+      }
+      .tit {
+        font-size: 50px;
+        color: #fff;
+        margin-bottom: 50px;
+        font-family: Alibaba;
+      }
+      .entered {
+        background: rgba(30, 255, 0, 0.15);
+      }
+      .entered > .num {
+        color: #0dad21;
+      }
+      .left {
+        margin: 0 15px;
+        background: rgb(50, 100, 192, 0.15);
+      }
+      .left > .num {
+        color: #006cb8;
+      }
+      .staying {
+        background: rgb(255, 64, 64, 0.15);
+      }
+      .staying > .num {
+        color: #ff5400;
+      }

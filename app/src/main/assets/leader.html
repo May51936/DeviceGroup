@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel='stylesheet' href='leader.css' />
+    <link rel='stylesheet' href='main.css' />
+	<link rel="icon" href="icon.ico" type="image/x-icon">
+    <title>leader page</title>
+</head>
+
+<body>
+
+<div class="mainContent">
+    <div class="content">
+        <p class="title">Waiting for more members to join...</p>
+    </div>
+    <div class="content">
+        <p class="subtitle" id="leaderIp">Leader's ip: </p>
+    </div>
+    <div class="content">
+        <p class="subtitle" id="leaderIp">If all devices connected. Please go to next step.</p>
+    </div>
+	<div class="content">
+        <ol id="memberList">
+        </ol>
+    </div>
+    <div class="content">
+        <button class="backButton" onclick="window.location.href='index.html'">Back</button>
+        <button class="nextButton">Next</button>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    var httpRequest = new XMLHttpRequest();
+    var ipElement = document.getElementById('leaderIp');
+    httpRequest.open('POST', '.', true);
+    httpRequest.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    httpRequest.send('method=1');
+    httpRequest.onreadystatechange = function () {
+        if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+           ipElement.innerHTML += httpRequest.responseText;
+        }
+    };
+    function updateMembers(){
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState==4 && xmlhttp.status==200){
+                var memberList = document.getElementById('memberList');
+                memberList.innerHTML = "";
+                var json = JSON.parse(xmlhttp.responseText);
+                var item;
+                for (var ip in json) {
+                    item = "<li class=\"";
+                    if(json[ip]){
+                        item += "onlineItem\">";
+                    }
+                    else{
+                        item += "offlineItem\">";
+                    }
+                    item += "<a href=\"http:\\\\";
+                    item += ip;
+                    item += ":7034";
+                    item += "\">";
+                    item += ip;
+                    item += "<\a>";
+                    item += "&emsp;&emsp;&emsp;&emsp;name&emsp;&emsp;&emsp;&emsp;<span class=\"";
+                    if(json[ip]){
+                        item += "online\">online</span></li>";
+                    }
+                    else{
+                        item += "offline\">offline</span></li>";
+                    }
+                    memberList.innerHTML += item;
+                }
+        	}
+        };
+        xmlhttp.open("GET", "/getMemberList", true);
+        xmlhttp.send();
+    }
+    setInterval(updateMembers, 1000);
+</script>
+
+</body>
+</html>

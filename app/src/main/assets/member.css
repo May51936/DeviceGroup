@@ -1,0 +1,26 @@
+.title{
+    margin-top: 50px;
+    font-size: 40px;
+}
+.subtitle{
+    margin-top: 15px;
+    font-size: 30px;
+}
+.switchButton{
+    font-size: 20px;
+    width: 200px;
+    margin-top: 50px;
+}
+#leaderIp{
+    height: 20px;
+    width: 200px;
+    font-size: 20px;
+}
+#connectButton{
+    font-size: 20px;
+    width: 100px;
+    margin-left: 50px;
+}
+.connectContent{
+    margin-bottom: 50px;
+}

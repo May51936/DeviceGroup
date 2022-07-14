@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
+
+<!--        <ImageView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:src="@drawable/screen"-->
+<!--            android:rotation="90"-->
+<!--            android:scaleType="fitCenter"/>-->
+
+        <Button
+            android:id="@+id/in"
+            android:layout_width="200dp"
+            android:layout_height="70dp"
+            android:background="@color/white"
+            android:text="In"
+            android:textSize="20sp"/>
+
+        <Button
+            android:layout_marginTop="70dp"
+            android:id="@+id/out"
+            android:layout_width="200dp"
+            android:layout_height="70dp"
+            android:background="@color/white"
+            android:text="Out"
+            android:textSize="20sp"/>
+
+
+    </LinearLayout>
+
+
+
+</RelativeLayout>
