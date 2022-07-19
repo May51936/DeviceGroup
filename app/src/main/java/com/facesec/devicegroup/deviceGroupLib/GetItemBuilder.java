@@ -1,8 +1,6 @@
-package com.facesec.devicegroup;
+package com.facesec.devicegroup.deviceGroupLib;
 
-import com.facesec.devicegroup.Util.ConfigUtils;
-
-public class GetItemBuilder implements URLBuilder{
+class GetItemBuilder implements URLBuilder{
 
     private String getUrl;
 
@@ -11,7 +9,7 @@ public class GetItemBuilder implements URLBuilder{
     }
 
     @Override
-    public URLBuilder addItem(String name, String value) {
+    public URLBuilder addItem(String name, Object value) {
         getUrl += (name + "=" + value);
         return this;
     }

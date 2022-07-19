@@ -1,11 +1,11 @@
-package com.facesec.devicegroup.Util;
+package com.facesec.devicegroup.deviceGroupLib;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
-public class NetworkUtils {
+class NetworkUtils {
 
     @SuppressLint("DefaultLocale")
     public static String getLocalIPAddress(Context context) {

@@ -8,14 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package com.facesec.devicegroup;
+package com.facesec.devicegroup.deviceGroupLib;
 
 import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-
-import com.facesec.devicegroup.Util.NetworkUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,7 +37,7 @@ import java.util.concurrent.ExecutorService;
  */
 
 
-public class TCPChannelClient {
+class TCPChannelClient {
   private static final String TAG = "TCPChannelClient";
 
   private final ExecutorService executor;

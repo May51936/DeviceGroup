@@ -1,14 +1,7 @@
-package com.facesec.devicegroup;
-
-import androidx.appcompat.app.AppCompatActivity;
+package com.facesec.devicegroup.deviceGroupLib;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
-
-import com.facesec.devicegroup.Util.ConfigUtils;
-import com.facesec.devicegroup.Util.NetworkUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,14 +10,12 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class LeaderManager implements TCPChannelClient.TCPChannelEvents{
+class LeaderManager implements TCPChannelClient.TCPChannelEvents{
 
     private static final String TAG = LeaderManager.class.getSimpleName();
     private boolean finish = false;
@@ -34,6 +25,7 @@ public class LeaderManager implements TCPChannelClient.TCPChannelEvents{
     private Map<String, Boolean> clients = new HashMap<>();
     private volatile static LeaderManager leaderManager;
     private Context context;
+    private OnDataReceivedListener onDataReceivedListener;
 
     private LeaderManager (){
         executorService = Executors.newSingleThreadExecutor();
@@ -160,34 +152,40 @@ public class LeaderManager implements TCPChannelClient.TCPChannelEvents{
 
     @Override
     public void onTCPMessage(String message) {
-        if (message == null)
-            return;
+        Log.e("Leader", "Received" + message);
         try {
-            JSONObject msg = new JSONObject(message);
-            String type = msg.optString("type");
-            switch (type){
-                case "data":
-                    int in = msg.optInt("in");
-                    int out = msg.optInt("out");
-                    int total = msg.optInt("total");
-                    Log.i("Received", "data");
-                    break;
-                case "ip":
-                    String ip = msg.optString("ip");
-                    if (!clients.keySet().contains(ip)){
-                        clients.put(ip, true);
-                    }
-                    Log.i("Received", "new client");
-                    break;
-                case "disconnect":
-                    clients.put(msg.optString("ip"), false);
-                    Log.i("Received", "remove client");
-                    break;
-            }
-            Log.e(TAG,"Received: " + msg.toString());
+            onDataReceivedListener.onLeaderDataReceived(new JSONObject(message));
         } catch (JSONException e) {
             e.printStackTrace();
         }
+//        if (message == null)
+//            return;
+//        try {
+//            JSONObject msg = new JSONObject(message);
+//            String type = msg.optString("type");
+//            switch (type){
+//                case "data":
+//                    int in = msg.optInt("in");
+//                    int out = msg.optInt("out");
+//                    int total = msg.optInt("total");
+//                    Log.i("Received", "data");
+//                    break;
+//                case "ip":
+//                    String ip = msg.optString("ip");
+//                    if (!clients.keySet().contains(ip)){
+//                        clients.put(ip, true);
+//                    }
+//                    Log.i("Received", "new client");
+//                    break;
+//                case "disconnect":
+//                    clients.put(msg.optString("ip"), false);
+//                    Log.i("Received", "remove client");
+//                    break;
+//            }
+//            Log.e(TAG,"Received: " + msg.toString());
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
@@ -199,6 +197,10 @@ public class LeaderManager implements TCPChannelClient.TCPChannelEvents{
     public void onTCPClose() {
         Log.e(TAG,"Server closed");
         count--;
+    }
+
+    public void setOnDataReceivedListener(OnDataReceivedListener onDataReceivedListener){
+        this.onDataReceivedListener = onDataReceivedListener;
     }
 
 

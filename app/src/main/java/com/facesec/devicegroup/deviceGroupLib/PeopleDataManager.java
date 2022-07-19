@@ -1,4 +1,4 @@
-package com.facesec.devicegroup.Interchange;
+package com.facesec.devicegroup.deviceGroupLib;
 
 import java.util.HashMap;
 import java.util.Map;

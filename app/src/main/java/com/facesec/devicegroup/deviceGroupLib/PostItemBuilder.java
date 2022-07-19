@@ -1,4 +1,4 @@
-package com.facesec.devicegroup;
+package com.facesec.devicegroup.deviceGroupLib;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -6,7 +6,7 @@ import org.apache.http.message.BasicNameValuePair;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PostItemBuilder implements URLBuilder{
+class PostItemBuilder implements URLBuilder{
 
     private List<NameValuePair> params;
 
@@ -15,8 +15,8 @@ public class PostItemBuilder implements URLBuilder{
     }
 
     @Override
-    public PostItemBuilder addItem(String name, String value) {
-        params.add(new BasicNameValuePair(name, value));
+    public PostItemBuilder addItem(String name, Object value) {
+        params.add(new BasicNameValuePair(name, (String)value));
         return this;
     }
 

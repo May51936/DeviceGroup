@@ -1,16 +1,7 @@
-package com.facesec.devicegroup;
-
-import androidx.appcompat.app.AppCompatActivity;
+package com.facesec.devicegroup.deviceGroupLib;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-
-import com.facesec.devicegroup.Util.ConfigUtils;
-import com.facesec.devicegroup.Util.NetworkUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,7 +13,7 @@ import java.net.MulticastSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MemberManager implements TCPChannelClient.TCPChannelEvents{
+class MemberManager implements TCPChannelClient.TCPChannelEvents{
 
     private static final String TAG = MemberManager.class.getSimpleName();
     private String leaderIp;
@@ -134,9 +125,15 @@ public class MemberManager implements TCPChannelClient.TCPChannelEvents{
         return status;
     }
 
-    private void sendMessage(JSONObject message) {
-        tcpChannelClient.send(message.toString());
-        Log.e(TAG,"Send out "+ message);
+    public void sendMessage(JSONObject message) {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                tcpChannelClient.send(message.toString());
+                Log.e(TAG,"Send out "+ message);
+            }
+        });
+
     }
 
     public static void jsonPut(JSONObject json, String key, Object value) {

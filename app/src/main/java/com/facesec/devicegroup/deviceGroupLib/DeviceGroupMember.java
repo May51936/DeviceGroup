@@ -1,16 +1,13 @@
-package com.facesec.devicegroup;
+package com.facesec.devicegroup.deviceGroupLib;
 
 import android.content.Context;
-
-import com.facesec.devicegroup.Util.ConfigUtils;
-import com.facesec.devicegroup.Util.NetworkUtils;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
-public class DeviceGroupMember {
+class DeviceGroupMember {
 
     private Context context;
     private InetAddress address;

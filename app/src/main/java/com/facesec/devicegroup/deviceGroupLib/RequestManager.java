@@ -1,9 +1,6 @@
-package com.facesec.devicegroup;
+package com.facesec.devicegroup.deviceGroupLib;
 
 import android.util.Log;
-
-import com.facesec.devicegroup.Util.ConfigUtils;
-import com.facesec.devicegroup.Util.NetworkUtils;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -13,15 +10,11 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
-public class RequestManager {
+class RequestManager {
 
     private volatile static RequestManager requestManager;
     private HttpClient httpClient;
