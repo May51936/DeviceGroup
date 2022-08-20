@@ -2,10 +2,10 @@ package com.facesec.devicegroup.deviceGroupLib;
 
 import android.content.Context;
 
+import com.facesec.devicegroup.deviceGroupLib.util.ConfigUtils;
+import com.facesec.devicegroup.deviceGroupLib.util.NetworkUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;

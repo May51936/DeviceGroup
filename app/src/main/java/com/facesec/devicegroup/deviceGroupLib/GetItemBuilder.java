@@ -1,5 +1,7 @@
 package com.facesec.devicegroup.deviceGroupLib;
 
+import com.facesec.devicegroup.deviceGroupLib.util.ConfigUtils;
+
 class GetItemBuilder implements URLBuilder{
 
     private String getUrl;

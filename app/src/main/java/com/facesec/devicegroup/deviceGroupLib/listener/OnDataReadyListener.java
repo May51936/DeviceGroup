@@ -1,4 +1,4 @@
-package com.facesec.devicegroup.deviceGroupLib;
+package com.facesec.devicegroup.deviceGroupLib.listener;
 
 public interface OnDataReadyListener {
 

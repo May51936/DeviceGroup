@@ -2,6 +2,9 @@ package com.facesec.devicegroup.deviceGroupLib;
 
 import android.content.Context;
 
+import com.facesec.devicegroup.deviceGroupLib.util.ConfigUtils;
+import com.facesec.devicegroup.deviceGroupLib.util.NetworkUtils;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;

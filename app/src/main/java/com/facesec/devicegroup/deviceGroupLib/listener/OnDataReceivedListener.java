@@ -1,4 +1,4 @@
-package com.facesec.devicegroup.deviceGroupLib;
+package com.facesec.devicegroup.deviceGroupLib.listener;
 
 import org.json.JSONObject;
 

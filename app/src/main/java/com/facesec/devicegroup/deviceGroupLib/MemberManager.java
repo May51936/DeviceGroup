@@ -3,6 +3,9 @@ package com.facesec.devicegroup.deviceGroupLib;
 import android.content.Context;
 import android.util.Log;
 
+import com.facesec.devicegroup.deviceGroupLib.util.ConfigUtils;
+import com.facesec.devicegroup.deviceGroupLib.util.NetworkUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -110,7 +113,7 @@ class MemberManager implements TCPChannelClient.TCPChannelEvents{
             public void run() {
                 JSONObject msg = new JSONObject();
                 jsonPut(msg,"type","disconnect");
-                jsonPut(msg,"ip",NetworkUtils.getLocalIPAddress(context));
+                jsonPut(msg,"ip", NetworkUtils.getLocalIPAddress(context));
                 sendMessage(msg);
                 if (tcpChannelClient != null)
                     tcpChannelClient.disconnect();

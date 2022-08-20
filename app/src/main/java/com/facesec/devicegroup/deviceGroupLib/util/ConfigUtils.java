@@ -1,6 +1,6 @@
-package com.facesec.devicegroup.deviceGroupLib;
+package com.facesec.devicegroup.deviceGroupLib.util;
 
-class ConfigUtils {
+public class ConfigUtils {
 
     public static final int BROADCAST_PORT = 18793;
 

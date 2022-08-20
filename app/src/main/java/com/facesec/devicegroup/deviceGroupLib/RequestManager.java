@@ -2,6 +2,9 @@ package com.facesec.devicegroup.deviceGroupLib;
 
 import android.util.Log;
 
+import com.facesec.devicegroup.deviceGroupLib.util.ConfigUtils;
+import com.facesec.devicegroup.deviceGroupLib.util.NetworkUtils;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;

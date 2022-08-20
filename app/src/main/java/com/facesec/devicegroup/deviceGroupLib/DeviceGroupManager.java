@@ -3,6 +3,9 @@ package com.facesec.devicegroup.deviceGroupLib;
 import android.content.Context;
 import android.util.Log;
 
+import com.facesec.devicegroup.deviceGroupLib.listener.OnDataReceivedListener;
+import com.facesec.devicegroup.deviceGroupLib.listener.OnErrorListener;
+
 import org.json.JSONObject;
 
 import java.io.IOException;
