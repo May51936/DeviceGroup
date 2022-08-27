@@ -17,6 +17,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.util.List;
 
+/***
+ *
+ */
+
 class RequestManager {
 
     private volatile static RequestManager requestManager;

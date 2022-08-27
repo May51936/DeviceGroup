@@ -16,6 +16,12 @@ import java.security.cert.CertificateException;
 
 import fi.iki.elonen.NanoHTTPD;
 
+/***
+ * Created by Wang Tianyu
+ * Singleton class for device group management, main class for external using
+ * Steps: 1. Get instance 2.
+ */
+
 public class DeviceGroupManager implements DeviceGroupWebServer, DataTransfer{
 
     private String hostIp;
@@ -28,8 +34,10 @@ public class DeviceGroupManager implements DeviceGroupWebServer, DataTransfer{
     private static volatile DeviceGroupManager deviceGroupManager;
 //    private OnDetectedListener onDetectedListener;
 
-    private DeviceGroupManager(Context context){
+
+    private DeviceGroupManager(Context context, String ip){
         this.context = context;
+        this.hostIp = ip;
         try {
             webServer = new WebServer(context);
         } catch (IOException e) {
@@ -45,21 +53,29 @@ public class DeviceGroupManager implements DeviceGroupWebServer, DataTransfer{
         }
     }
 
-    public static DeviceGroupManager getInstance(Context context){
+    /**
+     * Get Singleton instance for device group manager
+     * @param context
+     * @return Class instance
+     */
+
+    public static DeviceGroupManager getInstance(Context context, String ip){
         if (deviceGroupManager == null){
             synchronized (DeviceGroupManager.class){
                 if (deviceGroupManager == null){
-                    deviceGroupManager = new DeviceGroupManager(context);
+                    deviceGroupManager = new DeviceGroupManager(context, ip);
                 }
             }
         }
         return deviceGroupManager;
     }
 
+    /**
+     * Start web server
+     */
     @Override
     public void webServerStart(){
         try {
-            webServer.setHostIp(hostIp);
             webServer.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
         } catch (IOException e) {
             e.printStackTrace();
@@ -71,11 +87,6 @@ public class DeviceGroupManager implements DeviceGroupWebServer, DataTransfer{
     public void webServerStop(){
         webServer.stop();
         Log.i(TAG, "WebServer stoped");
-    }
-
-    @Override
-    public void setHostAddress(String ip){
-        this.hostIp = hostIp;
     }
 
     public void setOnErrorListener(OnErrorListener onErrorListener){

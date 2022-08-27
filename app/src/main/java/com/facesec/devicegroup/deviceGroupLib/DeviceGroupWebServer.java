@@ -6,6 +6,4 @@ public interface DeviceGroupWebServer {
 
     public void webServerStop();
 
-    public void setHostAddress(String ip);
-
 }

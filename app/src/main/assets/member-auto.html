@@ -19,7 +19,7 @@
         <p class="subtitle">Click to switch to maunally connecting</p>
     </div>
     <div class="content">
-        <button class="switchButton" onclick="window.location.href='member-manual.html'">Switch</button>
+        <button class="switchButton" onclick="window.location.href='member-manual.html'" id="switchButton">Switch</button>
     </div>
 
     <div class="content">
@@ -46,6 +46,8 @@
         httpRequest.send('method=5');
         window.location.href='index.html';
     };
+
+    var switchButton = document.getElementById("switchButton");
     var nextButton = document.getElementById("nextButton");
     var hint = document.getElementById("hint");
     function getState(){
@@ -57,11 +59,14 @@
                     hint.innerHTML = "Connected!";
                     hint.style.color = "green";
                     nextButton.disabled = false;
+                    switchButton.disabled = true;
                 }
                 else{
                     hint.innerHTML = "Finding leader...";
                     hint.style.color = "black";
                     nextButton.disabled = true;
+                    switchButton.disabled = false;
+
                 }
         	}
         };

@@ -1,6 +1,13 @@
 package com.facesec.devicegroup.deviceGroupLib.util;
 
+/***
+ * Created by Wang Tianyu
+ * Constants setting for device group
+ */
+
 public class ConfigUtils {
+
+    public static final int WEB_SERVER_PORT = 7034;
 
     public static final int BROADCAST_PORT = 18793;
 
@@ -11,6 +18,8 @@ public class ConfigUtils {
     public static final String WEB_SERVER_IP = "http://localhost:7034";
 
     public static String localIp = "";
+
+    public static final long tcpCheckTime = 30000;
 
     public static final int LEADER_START = 1;
 

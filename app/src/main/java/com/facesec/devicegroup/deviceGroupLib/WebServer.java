@@ -1,6 +1,7 @@
 package com.facesec.devicegroup.deviceGroupLib;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.facesec.devicegroup.deviceGroupLib.util.ConfigUtils;
 import com.facesec.devicegroup.deviceGroupLib.util.NetworkUtils;
@@ -19,6 +20,11 @@ import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
 
+/***
+ * Created by Wang Tianyu
+ * Web server class based on NanoHTTPD
+ * Default port: 7034 set in ConfigUtils
+ */
 
 class WebServer extends NanoHTTPD {
 
@@ -32,14 +38,36 @@ class WebServer extends NanoHTTPD {
     private PeopleDataManager peopleDataManager;
     private String hostIp;
 
+    /**
+     * Initialize web server using default port 7034
+     * @param context
+     * @throws IOException
+     * @throws KeyStoreException
+     * @throws CertificateException
+     * @throws NoSuchAlgorithmException
+     * @throws UnrecoverableKeyException
+     */
+
     public WebServer(Context context) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
-        super(7034);
-//        makeSecure(NanoHTTPD.makeSSLSocketFactory(
+        this(context, ConfigUtils.WEB_SERVER_PORT);
+    }
+
+    /**
+     * Initialize web server using specialized port
+     * @param context
+     * @throws IOException
+     * @throws KeyStoreException
+     * @throws CertificateException
+     * @throws NoSuchAlgorithmException
+     * @throws UnrecoverableKeyException
+     */
+
+    public WebServer(Context context, int port) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
+        super(port);
+//      makeSecure(NanoHTTPD.makeSSLSocketFactory(
 //                "/keystore.bks", "password".toCharArray()), null);
         this.context = context;
         peopleDataManager = PeopleDataManager.getPeopleDataManager();
-
-
 //        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 //        InputStream keyStoreStream = context.getAssets().open("keystore.bks");
 //        keyStore.load(keyStoreStream, "password".toCharArray());
@@ -49,6 +77,11 @@ class WebServer extends NanoHTTPD {
     }
 
 
+    /**
+     * Serve the request through given session
+     * @param session Request
+     * @return
+     */
     @Override
     public Response serve(IHTTPSession session) {
         String uri = session.getUri();
@@ -112,97 +145,87 @@ class WebServer extends NanoHTTPD {
                 "The requested resource does not exist");
     }
 
+    /**
+     * Execute corresponding method by post request
+     * @param request Post request
+     * @return
+     */
+
     private String executePostByMethod(String request){
-        if (NetworkUtils.getMethodOfPost(request) == ConfigUtils.LEADER_START){
-            LeaderManager.getLeaderManager().setContext(context).start();
-            return NetworkUtils.getLocalIPAddress(context);
-        }
-        else if (NetworkUtils.getMethodOfPost(request) == ConfigUtils.MEMBER_AUTO_START){
-            MemberManager.getMemberManager().setContext(context).autoStart();
-        }
-        else if (NetworkUtils.getMethodOfPost(request) == ConfigUtils.MEMBER_MANUAL_START) {
-            MemberManager.getMemberManager().setContext(context).manualStart(NetworkUtils.getIpOfPost(request));
-        }
-        else if (NetworkUtils.getMethodOfPost(request) == ConfigUtils.LEADER_END) {
-            MemberManager.getMemberManager().setContext(context).autoStart();
-        }
-        else if (NetworkUtils.getMethodOfPost(request) == ConfigUtils.MEMBER_AUTO_END) {
-            MemberManager.getMemberManager().setContext(context).close();
-        }
-        else if (NetworkUtils.getMethodOfPost(request) == ConfigUtils.MEMBER_MANUAL_END) {
-            MemberManager.getMemberManager().setContext(context).autoStart();
+        final int method = NetworkUtils.getMethodOfPost(request);
+        Log.i("Webserver", "post method " + method + " received");
+        switch (method){
+            case ConfigUtils.LEADER_START:
+                LeaderManager.getLeaderManager().setContext(context).start();
+                return NetworkUtils.getLocalIPAddress(context);
+            case ConfigUtils.LEADER_END:
+                LeaderManager.getLeaderManager().setContext(context).stopConnectNewMembers();
+                break;
+            case ConfigUtils.MEMBER_AUTO_START:
+                MemberManager.getMemberManager().setContext(context).autoStart();
+                break;
+            case ConfigUtils.MEMBER_MANUAL_START:
+                MemberManager.getMemberManager().setContext(context).manualStart(NetworkUtils.getIpOfPost(request));
+                break;
+            case ConfigUtils.MEMBER_AUTO_END:
+                MemberManager.getMemberManager().setContext(context).close();
+                break;
+            case ConfigUtils.MEMBER_MANUAL_END:
+                MemberManager.getMemberManager().setContext(context).close();
+                break;
+
         }
         return "";
     }
 
-//    private String executePostByMethod(String request){
-//        switch (NetworkUtils.getMethodOfPost(request)){
-//            case ConfigUtils.LEADER_START:
-//                LeaderManager.getLeaderManager().setContext(context).start();
-//                return NetworkUtils.getLocalIPAddress(context);
-//            case ConfigUtils.MEMBER_AUTO_START:
-//                MemberManager.getMemberManager().setContext(context).autoStart();
-//                break;
-//            case ConfigUtils.MEMBER_MANUAL_START:
-//                MemberManager.getMemberManager().setContext(context).manualStart(NetworkUtils.getIpOfPost(request));
-//                break;
-//            case ConfigUtils.LEADER_END:
-//                MemberManager.getMemberManager().setContext(context).autoStart();
-//                break;
-//            case ConfigUtils.MEMBER_AUTO_END:
-//                MemberManager.getMemberManager().setContext(context).close();
-//                break;
-//            case ConfigUtils.MEMBER_MANUAL_END:
-//                MemberManager.getMemberManager().setContext(context).autoStart();
-//                break;
-//        }
-//        return "";
-//    }
+    /**
+     * Execute corresponding method by get request
+     * @param filename Getting file name
+     * @return
+     */
 
     private String executeGetByFilename(String filename){
 
-        if (filename.equals("getMemberList")){
-            clients = LeaderManager.getLeaderManager().setContext(context).getClients();
-            mapper = new ObjectMapper();
-            memberData = mapper.createObjectNode();
-            for (Map.Entry<String, Boolean> client : clients.entrySet()){
-                memberData.put(client.getKey(), client.getValue());
-            }
-            try {
-                return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(memberData);
-            } catch (Exception ex) {
-                ex.printStackTrace();
+        switch (filename) {
+            case "getMemberList":
+                clients = LeaderManager.getLeaderManager().setContext(context).getClients();
+                mapper = new ObjectMapper();
+                memberData = mapper.createObjectNode();
+                for (Map.Entry<String, Boolean> client : clients.entrySet()) {
+                    memberData.put(client.getKey(), client.getValue());
+                }
+                try {
+                    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(memberData);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    return "";
+                }
+            case "getMemberConnectingState":
+                status = MemberManager.getMemberManager().setContext(context).getStatus();
+                mapper = new ObjectMapper();
+                memberStatus = mapper.createObjectNode();
+                memberStatus.put("Status", status);
+                try {
+                    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(memberStatus);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    return "";
+                }
+            case "getPeopleData":
+                try {
+                    PeopleData data = peopleDataManager.getTotalPeopleData();
+                    ObjectMapper mapper = new ObjectMapper();
+                    ObjectNode peopleData = mapper.createObjectNode();
+                    peopleData.put("in", data.getIn());
+                    peopleData.put("out", data.getOut());
+                    peopleData.put("total", data.getTotal());
+                    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(peopleData);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    return "";
+                }
+            default:
                 return "";
-            }
-        }
-        else if (filename.equals("getMemberConnectingState")){
-            status = MemberManager.getMemberManager().setContext(context).getStatus();
-            mapper = new ObjectMapper();
-            memberStatus = mapper.createObjectNode();
-            memberStatus.put("Status", status);
-            try {
-                return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(memberStatus);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                return "";
-            }
-        }
-        else if (filename.equals("getPeopleData")) {
-            try {
-                PeopleData data = peopleDataManager.getTotalPeopleData();
-                ObjectMapper mapper= new ObjectMapper();
-                ObjectNode peopleData = mapper.createObjectNode();
-                peopleData.put("in", data.getIn());
-                peopleData.put("out", data.getOut());
-                peopleData.put("total", data.getTotal());
-                return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(peopleData);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                return "";
-            }
-        }
-        else {
-            return "";
         }
     }
 
@@ -251,9 +274,6 @@ class WebServer extends NanoHTTPD {
 //        }
 //    }
 
-    public void setHostIp(String ip){
-        this.hostIp = hostIp;
-    }
 //
 //    public void memberSend(JSONObject data){
 //        MemberManager.getMemberManager().sendMessage(data);

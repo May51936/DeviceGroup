@@ -1,5 +1,7 @@
 package com.facesec.devicegroup.deviceGroupLib;
 
+import static com.facesec.devicegroup.deviceGroupLib.util.NetworkUtils.jsonPut;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -50,7 +52,7 @@ class MemberManager implements TCPChannelClient.TCPChannelEvents{
         try{
             InetAddress group = InetAddress.getByName(ConfigUtils.BROADCAST_IP);
             Log.e(TAG,"New member");
-            MulticastSocket socket = new MulticastSocket();
+            MulticastSocket socket = new MulticastSocket(ConfigUtils.BROADCAST_PORT);
             socket.joinGroup(group);
             byte[] msg = ("Who's leader").getBytes();
             DatagramPacket packet = new DatagramPacket(msg,msg.length,group,ConfigUtils.BROADCAST_PORT);
@@ -139,13 +141,7 @@ class MemberManager implements TCPChannelClient.TCPChannelEvents{
 
     }
 
-    public static void jsonPut(JSONObject json, String key, Object value) {
-        try {
-            json.put(key, value);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 
     @Override
     public void onTCPConnected(boolean server) {
@@ -165,7 +161,20 @@ class MemberManager implements TCPChannelClient.TCPChannelEvents{
 
     @Override
     public void onTCPMessage(String message) {
-
+        if (message != null){
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(message);
+                if (jsonObject.getString("type").equals("check")){
+                    JSONObject msg = new JSONObject();
+                    jsonPut(msg,"type","checkRsp");
+                    jsonPut(msg, "ip", NetworkUtils.getLocalIPAddress(context));
+                    sendMessage(msg);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

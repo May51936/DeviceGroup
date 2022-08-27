@@ -22,6 +22,10 @@ import java.security.cert.CertificateException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/***
+ * Created by Wang Tianyu
+ * Testing activity
+ */
 public class Test extends Activity{
 
     private ExecutorService executor;
@@ -93,8 +97,7 @@ public class Test extends Activity{
 //    }
 
     private void demo(){
-        DeviceGroupManager deviceGroupManager = DeviceGroupManager.getInstance(this);
-        deviceGroupManager.setHostAddress("http://192.168.0.140:1234/dashboard");
+        DeviceGroupManager deviceGroupManager = DeviceGroupManager.getInstance(this, "http://192.168.0.140:1234/dashboard");
         deviceGroupManager.webServerStart();
         deviceGroupManager.setOnDataReceivedListener(new OnDataReceivedListener() {
 
