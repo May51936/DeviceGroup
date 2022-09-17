@@ -6,7 +6,10 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
+import androidx.room.Room;
+
 import com.facesec.devicegroup.deviceGroupLib.listener.OnDataReceivedListener;
+import com.facesec.devicegroup.deviceGroupLib.listener.OnErrorListener;
 import com.facesec.devicegroup.deviceGroupLib.util.ConfigUtils;
 import com.facesec.devicegroup.deviceGroupLib.util.NetworkUtils;
 
@@ -35,17 +38,26 @@ class LeaderManager implements TCPChannelClient.TCPChannelEvents{
     private ExecutorService executorService;
     private TCPChannelClient tcpChannelClient;
     private int count = 0;
-    private Map<String, Boolean> clients = new HashMap<>();
+    private Map<String, Integer> clients = new HashMap<>();
+    private Map<String, Integer> msgNotReceivedClients = new HashMap<>();
     private volatile static LeaderManager leaderManager;
     private Context context;
     private OnDataReceivedListener onDataReceivedListener;
+    private OnErrorListener onErrorListener;
     private Thread tcpConnectThread;
     private volatile boolean tcpStart;
     private Runnable runnable;
-    private Handler handler;
+    private Handler handler = new Handler();
+    private boolean isChecking = false;
+    private boolean isConnecting = false;
+    private MemberDeviceDb database;
 
     private LeaderManager (){
         executorService = Executors.newSingleThreadExecutor();
+    }
+
+    public void setDatabase(MemberDeviceDb database) {
+        this.database = database;
     }
 
     public static LeaderManager getLeaderManager(){
@@ -100,7 +112,7 @@ class LeaderManager implements TCPChannelClient.TCPChannelEvents{
                             Log.e(TAG,msgString);
                             if (msgString.contains("Who's leader")) {
                                 String ip = packet.getAddress().getHostAddress();
-                                clients.put(ip, true);
+                                clients.put(ip, 0);
                                 int port = packet.getPort();
                                 Log.e(TAG, "Receive member from " + ip + ", " + port);
                                 byte[] sendMsg = ("I'm leader").getBytes();
@@ -154,7 +166,7 @@ class LeaderManager implements TCPChannelClient.TCPChannelEvents{
         });
     }
 
-    public Map<String, Boolean> getClients() {
+    public Map<String, Integer> getClients() {
         return clients;
     }
 
@@ -192,25 +204,32 @@ class LeaderManager implements TCPChannelClient.TCPChannelEvents{
 
     @Override
     public void onTCPMessage(String message) {
-        Log.e("Leader", "Received" + message);
+//        Log.e("Leader", "Received" + message);
         JSONObject jsonMsg = null;
-        if (message == null){
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-
+        if (message != null) {
+            try {
+                jsonMsg = new JSONObject(message);
+                switch (jsonMsg.getString("type")) {
+                    case "newMember":
+                        clients.put(jsonMsg.getString("ip"), 0);
+                        database.memberDeviceDao().insertDevice(new MemberDevice(jsonMsg.getString("ip")));
+                        Log.i("Member Devices", database.memberDeviceDao().queryAll().toString());
+                        break;
+                    case "checkRsp":
+                        String ip = jsonMsg.getString("ip");
+                        if (clients.containsKey(ip)) {
+                            clients.put(ip, 0);
+                        }
+                        if (msgNotReceivedClients.containsKey(ip)) {
+                            msgNotReceivedClients.remove(ip);
+                        }
+                        break;
                 }
-            }).start();
-        }
-        try {
-            jsonMsg = new JSONObject(message);
-            if (jsonMsg.getString("type").equals("ip")){
-                clients.put(jsonMsg.getString("ip"), true);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
+            onDataReceivedListener.onLeaderDataReceived(jsonMsg);
         }
-        onDataReceivedListener.onLeaderDataReceived(jsonMsg);
 //        if (message == null)
 //            return;
 //        try {
@@ -256,6 +275,10 @@ class LeaderManager implements TCPChannelClient.TCPChannelEvents{
         this.onDataReceivedListener = onDataReceivedListener;
     }
 
+    public void setOnErrorListener(OnErrorListener onErrorListener){
+        this.onErrorListener = onErrorListener;
+    }
+
     public void sendMessage(JSONObject message) {
         executorService.execute(new Runnable() {
             @Override
@@ -268,24 +291,79 @@ class LeaderManager implements TCPChannelClient.TCPChannelEvents{
     }
 
     private void checkTCPStatus(){
-        handler = new Handler();
-        Map<String, Boolean> status = new HashMap<>();
+//        handler = new Handler();
         runnable = new Runnable() {
             @Override
             public void run() {
-                for (String ip: clients.keySet()){
-                    if (Boolean.TRUE.equals(clients.get(ip))){
-                        status.put(ip, false);
+                Log.i("TCP", "Checking members status");
+                if (isChecking){
+                    for (String ip: clients.keySet()){
+                        if (clients.get(ip) == ConfigUtils.tcpHeartBeatMaxCheck){
+                            Log.e("TCP", "Member with ip " + ip + " need to reconnect");
+                            clients.put(ip, -2);
+                            msgNotReceivedClients.put(ip, 0);
+                        }
+                        if (clients.get(ip) > 0){
+                            Log.e("TCP", "Member with ip " + ip + " failed to answer " + clients.get(ip) + " times");
+                            clients.put(ip, clients.get(ip)+1);
+                        }
                     }
                 }
-                int size = status.size();
+                Log.i("TCP", "Checking passed");
+                isChecking = true;
+                for (String ip: clients.keySet()){
+                    if (clients.get(ip)==0){
+                        clients.put(ip, 1);
+                    }
+                }
                 JSONObject msg = new JSONObject();
                 jsonPut(msg,"type","check");
                 sendMessage(msg);
-                handler.postDelayed(this, ConfigUtils.tcpCheckTime);
+                handler.postDelayed(this, ConfigUtils.tcpReconnectTime);
             }
         };
-        handler.postDelayed(runnable, 0);
+        new Thread(runnable).start();
+
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                Log.i("TCP", "Re-connect");
+                for (String ip: msgNotReceivedClients.keySet()){
+                    if (msgNotReceivedClients.get(ip) < ConfigUtils.tcpMaxReconnect){
+                        Log.e("TCP", "Re-connect to " + ip + " for " + (msgNotReceivedClients.get(ip)+1) + " times");
+                        connect(ip);
+                        msgNotReceivedClients.put(ip, msgNotReceivedClients.get(ip)+1);
+                    }
+                    else{
+                        clients.put(ip, -1);
+                        msgNotReceivedClients.remove(ip);
+                        Log.e("Emergency", ip + " cannot connect");
+                        onErrorListener.onMemberDisconnect(ip);
+                    }
+                }
+//                for (String ip: clients.keySet()){
+//                    if (Boolean.TRUE.equals(clients.get(ip))){
+//                        status.put(ip, false);
+//                    }
+//                }
+                if (msgNotReceivedClients.size()!=0) {
+                    JSONObject msg = new JSONObject();
+                    jsonPut(msg, "type", "check");
+                    sendMessage(msg);
+                }
+                handler.postDelayed(this, ConfigUtils.tcpReconnectTime);
+            }
+        };
+        new Thread(runnable).start();
+    }
+
+    private void connect(String ip){
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                tcpChannelClient = new TCPChannelClient(executorService, LeaderManager.this,ip, ConfigUtils.TCP_PORT, context);
+            }
+        });
     }
 
 

@@ -29,7 +29,7 @@ import fi.iki.elonen.NanoHTTPD;
 class WebServer extends NanoHTTPD {
 
     private static final String TAG = WebServer.class.getSimpleName();
-    private Map<String, Boolean> clients;
+    private Map<String, Integer> clients;
     private ObjectMapper mapper;
     private ObjectNode memberData;
     private ObjectNode memberStatus;
@@ -37,6 +37,7 @@ class WebServer extends NanoHTTPD {
     private boolean status;
     private PeopleDataManager peopleDataManager;
     private String hostIp;
+    private MemberDeviceDb db;
 
     /**
      * Initialize web server using default port 7034
@@ -50,6 +51,10 @@ class WebServer extends NanoHTTPD {
 
     public WebServer(Context context) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
         this(context, ConfigUtils.WEB_SERVER_PORT);
+    }
+
+    public void setMemberDeviceDb (MemberDeviceDb db){
+        this.db = db;
     }
 
     /**
@@ -191,7 +196,7 @@ class WebServer extends NanoHTTPD {
                 clients = LeaderManager.getLeaderManager().setContext(context).getClients();
                 mapper = new ObjectMapper();
                 memberData = mapper.createObjectNode();
-                for (Map.Entry<String, Boolean> client : clients.entrySet()) {
+                for (Map.Entry<String, Integer> client : clients.entrySet()) {
                     memberData.put(client.getKey(), client.getValue());
                 }
                 try {

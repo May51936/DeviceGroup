@@ -28,10 +28,15 @@ class MemberManager implements TCPChannelClient.TCPChannelEvents{
     private volatile static MemberManager memberManager;
     private Context context;
     private boolean status = false;
+    private MemberDeviceDb database;
 
     public MemberManager setContext(Context context){
         this.context = context;
         return getMemberManager();
+    }
+
+    public void setDatabase(MemberDeviceDb database) {
+        this.database = database;
     }
 
     private MemberManager (){
@@ -151,7 +156,7 @@ class MemberManager implements TCPChannelClient.TCPChannelEvents{
             @Override
             public void run() {
                 JSONObject msg = new JSONObject();
-                jsonPut(msg,"type","ip");
+                jsonPut(msg,"type","newMember");
                 jsonPut(msg,"ip",NetworkUtils.getLocalIPAddress(context));
                 sendMessage(msg);
             }

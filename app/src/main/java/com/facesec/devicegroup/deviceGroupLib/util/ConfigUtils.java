@@ -11,7 +11,7 @@ public class ConfigUtils {
 
     public static final int BROADCAST_PORT = 18793;
 
-    public static final String BROADCAST_IP = "234.1.0.1";
+    public static String BROADCAST_IP = "234.1.0.1";
 
     public static final int TCP_PORT = 20178;
 
@@ -19,7 +19,13 @@ public class ConfigUtils {
 
     public static String localIp = "";
 
-    public static final long tcpCheckTime = 30000;
+    public static long tcpHeartBeatCheckTime = 5000;
+
+    public static int tcpHeartBeatMaxCheck = 5;
+
+    public static long tcpReconnectTime = 5000;
+
+    public static int tcpMaxReconnect = 5;
 
     public static final int LEADER_START = 1;
 

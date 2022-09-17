@@ -3,8 +3,11 @@ package com.facesec.devicegroup.deviceGroupLib;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.room.Room;
+
 import com.facesec.devicegroup.deviceGroupLib.listener.OnDataReceivedListener;
 import com.facesec.devicegroup.deviceGroupLib.listener.OnErrorListener;
+import com.facesec.devicegroup.deviceGroupLib.util.ConfigUtils;
 
 import org.json.JSONObject;
 
@@ -32,14 +35,22 @@ public class DeviceGroupManager implements DeviceGroupWebServer, DataTransfer{
     private OnDataReceivedListener onDataReceivedListener;
     private Context context;
     private static volatile DeviceGroupManager deviceGroupManager;
+    private MemberDeviceDb database;
 //    private OnDetectedListener onDetectedListener;
 
 
     private DeviceGroupManager(Context context, String ip){
         this.context = context;
         this.hostIp = ip;
+        database = Room.databaseBuilder(context, MemberDeviceDb.class, "MemberDeviceDb")
+                .allowMainThreadQueries()
+                .fallbackToDestructiveMigration()
+                .build();
+        MemberManager.getMemberManager().setDatabase(database);
+        LeaderManager.getLeaderManager().setDatabase(database);
         try {
             webServer = new WebServer(context);
+            webServer.setMemberDeviceDb(database);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (KeyStoreException e) {
@@ -86,11 +97,12 @@ public class DeviceGroupManager implements DeviceGroupWebServer, DataTransfer{
     @Override
     public void webServerStop(){
         webServer.stop();
-        Log.i(TAG, "WebServer stoped");
+        Log.i(TAG, "WebServer stopped");
     }
 
     public void setOnErrorListener(OnErrorListener onErrorListener){
         this.onErrorListener = onErrorListener;
+        LeaderManager.getLeaderManager().setOnErrorListener(onErrorListener);
     }
 
 //    public void setOnDataReadyListener(OnDataReadyListener onDataReadyListener) {
@@ -108,6 +120,20 @@ public class DeviceGroupManager implements DeviceGroupWebServer, DataTransfer{
     @Override
     public void memberSend(JSONObject data) {
         MemberManager.getMemberManager().sendMessage(data);
+    }
+
+    public void setHeartBeatTime(long time){
+        ConfigUtils.tcpHeartBeatCheckTime = time;
+    }
+
+    public void deleteMemberDevice(String ip){
+        database.memberDeviceDao().delete(database.memberDeviceDao().findDeviceByIp(ip));
+    }
+
+    public void updateMemberDeviceName(String ip, String name){
+        MemberDevice device = database.memberDeviceDao().findDeviceByIp(ip);
+        device.setName(name);
+        database.memberDeviceDao().update(device);
     }
 
 }
